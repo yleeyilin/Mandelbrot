@@ -55,24 +55,26 @@ void colorPixel(int iterations, double zr, double zi, int maxIterations,
         return;
     }
 
-    // Smooth coloring algorithm to remove harsh color banding
+    // Smooth potential calculation for the boundary
     double log_zn = std::log(zr * zr + zi * zi) / 2.0;
     double nu = std::log(log_zn / std::log(2.0)) / std::log(2.0);
     double smoothed = iterations + 1.0 - nu;
 
-    double t = smoothed * 0.05;
+    double t = smoothed * 0.15;
+    double edge = std::abs(std::sin(t));
+    double thinLine = std::pow(edge, 4.0);
 
-    // Much darker, moody bronze/gold outlines on a dark background
-    red   = static_cast<int>(35  + 30  * std::sin(t * 1.2));
-    green = static_cast<int>(18  + 15  * std::sin(t * 1.2 + 1.5));
-    blue  = static_cast<int>(8   + 7   * std::sin(t * 0.8 + 3.0));
+    // Dark indigo boundary lines on a pitch black background
+    red   = static_cast<int>(40  * thinLine);
+    green = static_cast<int>(25  * thinLine);
+    blue  = static_cast<int>(130 * thinLine);
 }
 
 
 
 int main() {
     // Create an image file.
-    std::ofstream image("mandelbrot_dark_gold.ppm");
+    std::ofstream image("mandelbrot_default.ppm");
 
     // PPM header: format, width, height, maximum color value.
     image << "P3\n";
@@ -81,11 +83,11 @@ int main() {
 
     std::vector<int> pixels(width * height * 3);
 
-    // Zoomed-in coordinate bounds for the spiral region (maintaining 4:3 ratio)
-    double xMin = -0.744;
-    double xMax = -0.743;
-    double yMin =  0.1165;
-    double yMax =  0.11725;
+    // Default full-set bounds scaled perfectly for 1200x900 (4:3 ratio)
+    double xMin = -2.0;
+    double xMax =  1.0;
+    double yMin = -1.125;
+    double yMax =  1.125;
 
     // Calculate the color of every pixel.
     #pragma omp parallel for schedule(dynamic)
@@ -120,6 +122,6 @@ int main() {
 
     image.close();
 
-    std::cout << "Image saved to mandelbrot_dark_gold.ppm\n";
+    std::cout << "Image saved to mandelbrot_default.ppm\n";
     return 0;
 }
